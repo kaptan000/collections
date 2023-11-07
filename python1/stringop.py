@@ -1,0 +1,10 @@
+mystr = "Hello world!"
+print(len(mystr))
+print(mystr.index('o'))
+print(mystr.count('l'))
+print(mystr[3:7])
+print(mystr[::2])
+print(mystr[::-1])
+print(mystr.startswith('h'))
+print(mystr.startswith('H'))
+print(mystr.split(' '))
