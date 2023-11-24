@@ -9,6 +9,8 @@ from .forms import EmployeeForm
 from django.http import HttpResponseRedirect,JsonResponse
 from django.urls import reverse
 from rest_framework import status
+from rest_framework import generics,mixins
+
 
 # Create your views here.
 class startingPage(View):
@@ -24,34 +26,52 @@ class startingPage(View):
             return HttpResponseRedirect(reverse('form'))
         return render(request,'framework_app/index.html',{"error":"You have not filled form correctly.","form":form})
 
-class employee(APIView):
-    def get(self,request,id):
-        if id:
-            employee = Employee.objects.get(pk=id)
-            serializer = EmployeeSerializer(employee)
-            return Response({'status':"200","data":serializer.data})
-        employees = Employee.objects.all()
-        print(employees)
-        serializer = EmployeeSerializer(employees,many=True)
-        return Response({'status':"200","data":serializer.data})
+# class employee(APIView):
+#     def get(self,request,id):
+#         if id:
+#             employee = Employee.objects.get(pk=id)
+#             serializer = EmployeeSerializer(employee)
+#             return Response({'status':"200","data":serializer.data})
+#         employees = Employee.objects.all()
+#         print(employees)
+#         serializer = EmployeeSerializer(employees,many=True)
+#         return Response({'status':"200","data":serializer.data})
    
-    def post(self,request):
-        new_data = EmployeeSerializer(data = request.data)
-        if new_data.is_valid():
-            new_data.save()
-            return Response({'status':'success',"data":new_data.data},status=status.HTTP_200_OK)    
-        return Response({'status':'error','data':new_data.errors})
+#     def post(self,request): 
+#         new_data = EmployeeSerializer(data = request.data)
+#         if new_data.is_valid():
+#             new_data.save()
+#             return Response({'status':'success',"data":new_data.data},status=status.HTTP_200_OK)    
+#         return Response({'status':'error','data':new_data.errors})
     
-    def patch(self,request,id):
-        employee = Employee.objects.get(pk=id)
-        serializer = EmployeeSerializer(employee,data=request.data,partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'status':'success','data':serializer.data})
-        return Response({'status':'error','error':serializer.errors})
+#     def patch(self,request,id):
+#         employee = Employee.objects.get(pk=id)
+#         serializer = EmployeeSerializer(employee,data=request.data,partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({'status':'success','data':serializer.data})
+#         return Response({'status':'error','error':serializer.errors})
     
-    def delete(self,request,id):
-        employee = Employee.objects.get(pk=id)
-        employee.delete()
-        return Response({'status':'success','message':'Record deleted'})
+#     def delete(self,request,id):
+#         employee = Employee.objects.get(pk=id)
+#         employee.delete()
+#         return Response({'status':'success','message':'Record deleted'})
   
+
+class Employee(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+    
+    def get(self,request,*args,**kwargs):
+        return self.list(request,*args,**kwargs)  
+    
+    def post(self,request,*args,**kwargs):
+        return self.create(request,*args,**kwargs)  
+    
+    def put(self,request,*args,**kwargs):
+        return self.update(request,*args,**kwargs)  
+    
+
+# class Employee(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Employee.objects.all()    
+#     serializer_class = EmployeeSerializer
