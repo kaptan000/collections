@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .models import Employee
-from .serializer import EmployeeSerializer
+from .models import Employee,Song,Singer
+from .serializer import EmployeeSerializer,SongSerializer,SingerSerializer
 from rest_framework.response import Response
 from django.views import View
 from django.shortcuts import render
@@ -10,7 +10,9 @@ from django.http import HttpResponseRedirect,JsonResponse
 from django.urls import reverse
 from rest_framework import status
 from rest_framework import generics,mixins
-
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticatedOrReadOnly,IsAuthenticated,IsAdminUser
+from rest_framework import viewsets
 
 # Create your views here.
 class startingPage(View):
@@ -61,6 +63,8 @@ class startingPage(View):
 class Employee(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAdminUser]
     
     def get(self,request,*args,**kwargs):
         return self.list(request,*args,**kwargs)  
@@ -75,3 +79,13 @@ class Employee(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelM
 # class Employee(generics.RetrieveUpdateDestroyAPIView):
 #     queryset = Employee.objects.all()    
 #     serializer_class = EmployeeSerializer
+
+class SingerView(viewsets.ModelViewSet):
+    queryset = Singer.objects.all()
+    serializer_class = SingerSerializer
+
+class SongView(viewsets.ReadOnlyModelViewSet):
+    queryset = Song.objects.all()
+    serializer_class = SongSerializer    
+    # def list(self, request, *args, **kwargs):
+    #     return super().list(request, *args, **kwargs)
